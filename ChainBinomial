@@ -1,0 +1,159 @@
+
+import numpy as np
+from scipy.stats import binom
+from functions import *
+
+
+
+##########Parameters
+
+h = 1/24
+GAMMA = 1/1.373
+p_2 = 1-np.exp(-h*GAMMA)
+p = np.array([0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5])
+THETA = 1/2.108
+p_3 = 1-np.exp(-h*p*THETA)
+p_3_comp = 1-np.exp(-h*(1-p)*THETA)
+PSI = 1.00
+p_4 = 1-np.exp(-h*PSI)
+PHI_1 = 0.75 
+OMEGA = 1.00       
+p_5 = 1-np.exp(-h*PHI_1*OMEGA)
+p_5_comp = 1-np.exp(-h*(1-PHI_1)*OMEGA)
+DELTA_1 = 1/4.176
+p_6 = 1-np.exp(-h*DELTA_1)
+DELTA_2 = 1 
+p_7 = 1-np.exp(-h*DELTA_2)
+DELTA_3 = 1    
+p_8 = 1-np.exp(-h*DELTA_3)
+DELTA_4 = 1
+p_9 = 1-np.exp(-h*DELTA_4)
+TAU_1 = 1
+p_10 = 1-np.exp(-h*TAU_1)
+TAU_2 = 1    
+p_11 = 1-np.exp(-h*TAU_2)    
+
+SIGMA_asym = 1/6.284
+
+
+q_sym=1
+q_asym=1
+    
+
+N = 10000                                      #Population size
+K = 10                                         #Number of age classes
+
+
+#A list that will store my experiment results
+destination_states = list()         
+
+#Function calls to the contact matrices
+C_asym = C_asym()
+C_sym = C_sym()
+
+
+repetitions = 100
+for i in range(repetitions):
+    
+    #Defining the origin state
+    S = np.repeat(int(N/K), K)
+    S = np.reshape(S,(1,10)) 
+    E = np.zeros((1,10)).astype(int)
+    I_PreSym = np.array([0,0,0,1,0,0,0,0,0,0])
+    I_PreSym = np.reshape(I_PreSym,(1,10)) 
+    I_Asym = np.zeros((1,10)).astype(int)
+    I_Mild = np.zeros((1,10)).astype(int)
+    I_Sev = np.zeros((1,10)).astype(int)
+    I_Hosp = np.zeros((1,10)).astype(int)
+    I_ICU = np.zeros((1,10)).astype(int)
+    R = np.zeros((1,10)).astype(int)
+    D = np.zeros((1,10)).astype(int)
+    
+    #####################Defining destination state########################
+    
+    #Sampling with chain binomial
+     
+    p_star = np.zeros(10) 
+    
+    for k in range(K):
+        p_star[k] = np.sum(np.multiply(q_asym*C_asym[k,], I_PreSym + I_Asym) + \
+                           np.multiply(q_sym*C_sym[k,],I_Mild + I_Sev))
+    
+    p_star = 1-np.exp(-h*p_star)
+    
+    E_new = np.random.binomial(S,p_star) 
+    
+    I_PreSym_New = np.random.binomial(E,p_2)
+    
+    I_Asym_New = np.random.binomial(I_PreSym,p_3)
+    
+    I_Mild_New = np.random.binomial(I_PreSym-I_Asym_New,p_3_comp)
+    
+    I_Sev_New = np.random.binomial(I_Mild,p_4)
+    
+    I_Hosp_New = np.random.binomial(I_Sev,p_5)
+    
+    I_ICU_New = np.random.binomial(I_Sev-I_Hosp_New,p_5_comp)
+    
+    R_Asym_New = np.random.binomial(I_Asym,p_6)
+    
+    R_Mild_New = np.random.binomial(I_Mild-I_Sev_New,p_7)
+    
+    R_Hosp_New = np.random.binomial(I_Hosp,p_8)
+    
+    R_ICU_New = np.random.binomial(I_ICU,p_9)
+    
+    D_Hosp_New = np.random.binomial(I_Hosp-R_Hosp_New,p_10)
+   
+    D_ICU_New = np.random.binomial(I_ICU-R_ICU_New,p_11)
+    
+    #####Compartmental updating rules 
+    
+    S = np.vstack((S,S[-1]-E_new))
+    
+    E = np.vstack((E,E[-1]+E_new-I_PreSym_New))
+    
+    I_PreSym = np.vstack((I_PreSym,I_PreSym[-1]+I_PreSym_New-I_Asym_New-I_Mild_New))
+    
+    I_Asym = np.vstack((I_Asym,I_Asym[-1]+I_Asym_New-R_Asym_New))
+    
+    I_Mild = np.vstack((I_Mild,I_Mild[-1]+I_Mild_New-I_Sev_New-R_Mild_New))
+    
+    I_Sev = np.vstack((I_Sev,I_Sev[-1]+I_Sev_New-I_Hosp_New-I_ICU_New))
+    
+    I_Hosp = np.vstack((I_Hosp,I_Hosp[-1]+I_Hosp_New-D_Hosp_New-R_Hosp_New))
+    
+    I_ICU = np.vstack((I_ICU,I_ICU[-1]+I_ICU_New-D_ICU_New-R_ICU_New))
+    
+    R = np.vstack((R,R[-1]+R_Asym_New+R_Mild_New+R_Hosp_New+R_ICU_New))
+    
+    D = np.vstack((D,D[-1]+D_Hosp_New+D_ICU_New))
+    
+    #This matrix stores the destination state per loop iteration
+    m = np.stack((S[-1], E[-1], I_PreSym[-1], I_Asym[-1], I_Mild[-1], I_Sev[-1] \
+                  , I_Hosp[-1], I_ICU[-1], R[-1], D[-1]), axis = 0)
+        
+    #Now, adding this state to the destination list 
+    destination_states.append(m)       
+
+
+##############################
+
+
+#Counting the frequency             
+destination_count = {}
+# iterating over the elements for frequency
+for element in destination_states:
+    key = tuple(element.flatten().tolist())
+    # checking whether it is in the dict or not
+    if key in destination_count:
+        # incerementing the count by 1
+        destination_count[key] += 1
+    else:
+        # setting the count to 1
+        destination_count[key] = 1            
+            
+#approximating the transition probability            
+proportion = {}
+for key in destination_count:
+    proportion[key] = destination_count[key]/len(destination_count)
