@@ -14,7 +14,6 @@ from scipy.stats import binom
 import os
 os.chdir("C:/Users/Alejandro/Documents/Research/Antonio's internship")
 from functions import *
-import time
 
 
 ##########Parameters
@@ -80,7 +79,7 @@ a_1 = np.prod(a_1)
 #Defining p_2
 p_2 = 1-np.exp(-h*GAMMA)
 
-
+assert(n[0]+n[1]-m[0] >= 0 and n[0]+n[1]-m[0] <= m[1])
 a_2 = binom.pmf(n[0]+n[1]-m[0],m[1],p_2)
 a_2 = np.prod(a_2)
 
@@ -93,14 +92,15 @@ p_3_comp = 1-np.exp(-h*(1-p)*THETA)
 
 #First check point
 #If 0 ≤ k1 ≤ m3:
-k_1 = m[0]+m[1]+m[2]-n[0]-n[1]-n[2]    
+k_1 = m[0]+m[1]+m[2]-n[0]-n[1]-n[2]
 print(k_1)
 
 a_3 = np.zeros(10)
 #Actually, I am making a sum per age group
 for k in range(K):
     for i in range(k_1[k]+1):  #I need to sum one because of python indexing 
-        a_3[k] += binom.pmf(i,m[2,k],p_3[k])*binom.pmf(k_1[k]-i,m[2,k]-i,p_3_comp[k])
+        if i >= 0 and i <= m[2,k]:
+            a_3[k] += binom.pmf(i,m[2,k],p_3[k])*binom.pmf(k_1[k]-i,m[2,k]-i,p_3_comp[k])
 
 a_3 = np.prod(a_3)
 
@@ -157,8 +157,9 @@ for k in range(K):
                 for j in range(p+1):
                     print(j)
                     a_5[k] += binom.pmf(j,m[4,k],p_5)*binom.pmf(p-j,m[4,k]-j,p_6)
+    else:
     #Case A_4-ii: n_4-m_4 < 0        
-    if n[3,k]-m[3,k] < 0:
+        assert(n[3,k]-m[3,k] < 0)
         for i in range(int(k_3[k])+1):
             p = m[4,k]-n[4,k]+k_1[k]-i
             #We care for values of p such that 0<=p<=m_5. Otherwise, we get zero 
