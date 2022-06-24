@@ -139,47 +139,38 @@ for i in range(n[3,]):
 p_5 = 1-np.exp(-h*PSI)
 p_6 = 1-np.exp(-h*DELTA_2)
 
-#Third check point
-#Assesing which case it belongs to
-print(n[4]-m[4])
-
-#Case i) If k1 ≥ n5 − m5 ≥ 0 and 0\leq n_4-m_4\leq k_1    
-k_3 = np.zeros(K)
-for k in range(K):    
-    k_3[k] = min(k_1[k]-(n[4,k]-m[4,k]), m[4,k])
 
 
+#This is good
 a_5 = np.zeros(K)    
 for k in range(K):
-    for i in range(n[3,k]-m[3,k], int(k_2[k])+1):
-        print(i)
-        for j in range(int(k_3[k])+1):
-            print(j)
-            #We care for ordinary factorials only 
-            if n[4,k]-m[4,k]+j <= m[2,k]-i:
+    #Case A_4-i: 0\leq n_4-m_4\leq k_1        
+    if n[3,k]-m[3,k] >= 0 and n[3,k]-m[3,k] <= k_1[k]:
+        for i in range(n[3,k]-m[3,k], int(n[3,k]-m[3,k]+k_2[k]+1)): 
+            print(i)
+            p = m[4,k]-n[4,k]+k_1[k]-i
+            #We care for values of p such that 0<=p<=m_5. Otherwise, we get zero 
+            #probabiliy, which is consistent with a_5 = np.zeros(K)    
+            if p>=0 and p<=m[4,k]:
                 print("hello"+str(i))
-                #First, calculating in a the new individuals in I_4 and R_2
-                a = np.zeros(K)
-                for l in range(j+1): 
-                    a[k] += binom.pmf(l,m[4,k],p_5)*binom.pmf(j-l,m[4,k]-l,p_6)
-                a_5[k] += binom.pmf(n[4,k]-m[4,k]+j,m[2,k]-i,p_3_comp[k])*a[k]   #the issue in here is how to take into account the branching?
-
-
+                #Computing the inner sum. Adding a one, cause it's open interval
+                for j in range(p+1):
+                    print(j)
+                    a_5[k] += binom.pmf(j,m[4,k],p_5)*binom.pmf(p-j,m[4,k]-j,p_6)
+    #Case A_4-ii: n_4-m_4 < 0        
+    if n[3,k]-m[3,k] < 0:
+        for i in range(int(k_3[k])+1):
+            p = m[4,k]-n[4,k]+k_1[k]-i
+            #We care for values of p such that 0<=p<=m_5. Otherwise, we get zero 
+            #probabiliy, which is consistent with a_5 = np.zeros(K)    
+            if p>=0 and p<=m[4,k]:
+                #Computing the inner sum
+                for j in range(p+1):
+                    print(j)
+                    a_5[k] += binom.pmf(j,m[4,k],p_5)*binom.pmf(p-j,m[4,k]-j,p_6)
 a_5 = np.prod(a_5)
- 
-#This following part has not been checked
-#Case iii) On the other hand, if n5 − m5 < 0:
-
-k_4 =
-limit = m_5-n_5+i
     
-for i in range(k_4):
-    a = 0
-    for j in range(limit):
-        a += binom.pmf(j,m[4,],p_5)*binom.pmf(m_5-n_5+i-j,m[4,]-j,p_6)
-    A_5 += binom.pmf(i,m[2,],p_3_comp)*a
-    
-    
+                        
 #########################A_6################################
 
 #Defining p_5
