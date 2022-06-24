@@ -98,8 +98,8 @@ print(k_1)
 a_3 = np.zeros(10)
 #Actually, I am making a sum per age group
 for k in range(K):
-    for i in range(k_1[k]+1):  #I need to sum one because of python indexing 
-        if i >= 0 and i <= m[2,k]:
+    if k_1[k] >= 0 and k_1[k] <= m[2,k]:
+        for i in range(k_1[k]+1):  #I need to sum one because of python indexing 
             a_3[k] += binom.pmf(i,m[2,k],p_3[k])*binom.pmf(k_1[k]-i,m[2,k]-i,p_3_comp[k])
 
 a_3 = np.prod(a_3)
