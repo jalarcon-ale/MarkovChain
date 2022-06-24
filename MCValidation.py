@@ -110,27 +110,30 @@ a_3 = np.prod(a_3)
 #Defining p_4
 p_4 = 1-np.exp(-h*DELTA_1)
 
-#Second check point
-#Assesing which case it belongs to
-print(n[3]-m[3])  
-
-#Case i) If k1 ≥ n4 − m4 ≥ 0 and 0 ≤ k1 ≤ m3
+#To be used in case A_4-i: If k1 ≥ n4 − m4 ≥ 0 and 0 ≤ k1 ≤ m3
 k_2 = np.zeros(10)
 for k in range(K):    
     k_2[k] = min(k_1[k]-(n[3,k]-m[3,k]), m[3,k])
+    
+#To be used in case A_4-ii: If n4 − m4 < 0 
+k_3 = np.zeros(K)
+for k in range(K):    
+    k_3[k] = min(k_1[k], n[3,k])    
+    
 
-a_4 = np.zeros(10)
+#Integrating the two possibilities in one loop
+a_4 = np.zeros(K)
 for k in range(K):
-    for i in range(int(k_2[k])+1):
-        a_4[k] += binom.pmf(n[3,k]-m[3,k]+i,m[2,k],p_3[k])*binom.pmf(i,m[3,k],p_4)
-
-a_4 = np.prod(a_4)
- 
-#This following part has not been checked
-#Case ii) If n4 − m4 < 0 and n4 ≤ k1
-#This one is not yet finished
-for i in range(n[3,]):
-    A_4 += binom.pmf(i,m[2,],p_3)*binom.pmf(m[3,]-n[3,]+i,m[3,],p_4)
+    #Case i) If k1 ≥ n4 − m4 ≥ 0 and 0 ≤ k1 ≤ m3
+    if n[3,k]-m[3,k] >= 0 and n[3,k]-m[3,k] <= k_1[k]:
+        for i in range(int(k_2[k])+1):
+            a_4[k] += binom.pmf(n[3,k]-m[3,k]+i,m[2,k],p_3[k])*binom.pmf(i,m[3,k],p_4)
+    #Case ii) If n4 − m4 < 0 
+    if n[3,k]-m[3,k] < 0:
+        for i in range(int(k_3[k])+1):
+            a_4[k] += binom.pmf(i,m[2,k],p_3[k])*binom.pmf(m[3,k]-n[3,k]+i,m[3,k],p_4)
+    
+a_4 = np.prod(a_4) 
 
 
 #########################A_5################################
