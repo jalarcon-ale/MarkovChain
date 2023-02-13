@@ -1,4 +1,6 @@
 # MarkovChain
+Contact info: alejandrojavier.alarcongonzalez@uantwerpen.be
+
 
 The Python file ChainBinomial contains the code to generate realizations (simulations) of a discrete-time Markovian SIR model. This model is 
 introduced next.
