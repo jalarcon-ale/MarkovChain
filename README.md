@@ -20,14 +20,14 @@ $$
 
 In this way, the number of susceptible, infected and recovered invividuals is given by the next system of recurrence relations 
 
-\begin{equation*}
+$$
     \begin{split}
         \label{eq:recurrence_relations}
         S_{t+h} = {} & S_{t} - I_{t+h}^{new}, \\
         I_{t+h} = {} & I_{t} + I_{t+h}^{new} - R_{t+h}^{new}. \\
         R_{t+h} = {} & R_{t} + R_{t+h}^{new}.
     \end{split}
-\end{equation*}
+$$
 
 The script in ChainBinomial takes as an input a range of population sizes varying from $10$ to $100$, and calculates the number of time steps (in hours) 
 it takes for the epidemic to die out. We follow the convention of considering that in the beginning there is one infectious individual  and the rest of 
