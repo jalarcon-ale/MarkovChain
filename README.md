@@ -9,13 +9,13 @@ The number of newly infected and removed individuals at time $t+h$ are denoted b
 Their update rule reads as follows
 
 
-\begin{equation*}
+$$
 \begin{split}
     I_{t+h}^{new}\sim Binomial(S_t, p_1(t)=&1-\exp(-h\beta I_t)), \\
     %\label{eq:binomial_update}
     R_{t+h}^{new}\sim Binomial(I_t, p_2(t)=&1-\exp(-h\gamma)).
 \end{split}
-\end{equation*}
+$$
 
 
 In this way, the number of susceptible, infected and recovered invividuals is given by the next system of recurrence relations 
