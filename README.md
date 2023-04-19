@@ -22,7 +22,7 @@ In this way, the number of susceptible, infected and recovered invividuals is gi
 
 $$
     \begin{split}
-        \label{eq:recurrence_relations}
+        %\label{eq:recurrence_relations}
         S_{t+h} = {} & S_{t} - I_{t+h}^{new}, \\
         I_{t+h} = {} & I_{t} + I_{t+h}^{new} - R_{t+h}^{new}. \\
         R_{t+h} = {} & R_{t} + R_{t+h}^{new}.
