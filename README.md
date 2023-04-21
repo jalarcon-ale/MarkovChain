@@ -29,7 +29,7 @@ $$
     \end{split}
 $$
 
-The script in ChainBinomial takes as an input a range of population sizes varying from $10$ to $100$, and calculates the number of time steps (in hours) 
+The script in Markov_SIR takes as an input a range of population sizes varying from $10$ to $100$, and calculates the number of time steps (in hours) 
 it takes for the epidemic to die out. We follow the convention of considering that in the beginning there is one infectious individual  and the rest of 
 the populations is susceptible to infection. 
 
