@@ -5,30 +5,89 @@ Created on Wed Nov 30 12:54:14 2022
 @author: Alejandro
 """
 import numpy as np
-import os
-os.chdir("C:/Users/Alejandro/Documents/Research/Epimarkov/Algo_experiments/betasobreN")
 from functions import *
 import time
 import matplotlib.pyplot as plt
 
-
 ##########Parameters
 
-h = 1/8
+h = 1/24
 GAMMA = 1/6
 BETA = 1/2
 p_2 = 1-np.exp(-h*GAMMA)
     
+#Population size
+N = 50                                    
 
+#number of repetitions of the Markovian SIR per fixed population size 
+max_repetitions = 10000
+
+    
+##############Estimating mean epidemic duration###################
+
+start_time = time.time()
+#samples is a list containing steps_array's, each array contains  
+#number of steps it takes for the model to "end".
+samples=[]
+for rep in range(1,max_repetitions+1,10):    
+    print(rep)
+    #Setting the initial condition when moving to the next sample size
+    initial_state=np.array([N-1,1,0])
+    #Initializing the array of steps for a fixed sample size
+    steps_array=np.full([rep], None)
+    i=0
+    while i<rep:
+        steps=0        
+        #Start over from the same source as before
+        (S,I,R) = initial_state
+        while I>0:
+            LAMBDA = BETA*I/N 
+            p_star = 1-np.exp(-h*LAMBDA)
+            I_new = np.random.binomial(S,p_star) 
+            R_New = np.random.binomial(I,p_2)
+            #Compartmental updating rules 
+            S = S-I_new
+            I = I+I_new-R_New
+            R = R+R_New
+            #Adding a time step to the simulation
+            steps+=1
+        #Reporting number of steps when no infectious left        
+        steps_array[i] = steps
+        i+=1
+    #Adding to the list     
+    samples.append(steps_array)        
+end_time = time.time()
+
+#Picking the mean from each set of simulations (sample)
+empirical_means=[np.mean(samples[i]) for i in range(len(samples))]
+
+################Plotting convergence of empirical mean###########
+x_axis=np.linspace(1, 10001, num=1000)
+for i in range(10):
+    x_axis[i]=int(x_axis[i])
+fig = plt.figure()
+plt.figure(dpi=300)  
+plt.plot(x_axis, empirical_means,'.')
+plt.xlabel('Sample size')
+plt.ylabel('Mean duration in hours')
+plt.title('Convergence of empirical mean')
+plt.show()
+
+
+##############Simulating epidemic durations####################
+
+##########Parameters
+
+h = 1/24
+GAMMA = 1/6
+BETA = 1/2
+p_2 = 1-np.exp(-h*GAMMA)
+    
 #Maximum population size
 N = 100                                     
 
-
 #number of repetitions of the Markovian SIR per fixed population size 
 repetitions = 100000
-
-    
-##############Counting number of steps till epidemic end####################
 
 #Cajas is a list containing steps_array's, each array contains simulated 
 #number of steps it takes for the model to "end".
@@ -37,7 +96,7 @@ for n in range(10,N+1,10):
     print(n)
     #Setting the initial condition
     #when moving to the next population size
-    initial_state=np.array([n,1,0])
+    initial_state=np.array([n-1,1,0])
     #Initializing the array of steps for a fixed pop size
     steps_array=np.full([repetitions], None)
     #Counting duration for fixed parameter values BETA, GAMMA, h and N
@@ -45,7 +104,7 @@ for n in range(10,N+1,10):
     i=0
     while i<repetitions:
         steps=0        
-        #magic stuff: I start over from the same source as before
+        #Start over from the same source as before
         (S,I,R) = initial_state
         while I>0:
             LAMBDA = BETA*I/n 
@@ -65,55 +124,20 @@ for n in range(10,N+1,10):
         
     cajas.append(steps_array)        
 
-#Saving to text file
-cajas=np.array(cajas)
-np.savetxt('cajas_half_day.txt',cajas)
-cajas=list(cajas)
+########Computing exact mean epidemic durations#######
 
-#Creating boxplot        
-fig = plt.figure()
-plt.boxplot(cajas, 'ro')
-plt.show()
-
-#np.mean(cajas[0])
-
-
-start_time = time.time()
+#Initializing vector of exact mean durations
 means=np.zeros(10)
 i=0
 for n in range(10,N+1,10):
-    print(n)
-    print(h)
-    print(GAMMA)
     BETA_2=BETA/n
-    print(BETA_2)
+    print(f"N = {n}, h = {h}, beta = {BETA_2}, gamma = {GAMMA}")
     #Calling the Model class
-    modelo=Model(n,h,GAMMA,BETA_2)
+    modelo=Model(popSize=n,h=h,beta=BETA_2,gamma=GAMMA)
     diccionario=modelo.endOfEpidemic()
     #For each population size, take the mean duration starting from m_0
-    #mean=diccionario[(n-1,1,0)]
     means[i]=diccionario[(n-1,1,0)].copy()
-    #np.savetxt('Algo_experiments/mean_ht_%s.txt'%n,mean)
     i+=1
-end_time = time.time()
-
-#Saving to text file
-np.savetxt('means_half_day.txt',means)
-
-
-
-##################Loading results############
-os.chdir("C:/Users/Alejandro/Documents/Research/Epimarkov/Algo_experiments/betasobreN")
-
-means=[]
-for i in range(10, 101, 10):
-    a=np.loadtxt("mean_ht_" + str(i) + ".txt", dtype=float)
-    a=float(a)
-    means.append(a)
-
-means=np.loadtxt("means_half_day" + ".txt", dtype=float)
-cajas=np.loadtxt("cajas_half_day" + ".txt", dtype=float)
-cajas=list(cajas)
 
 
 ########################################
@@ -122,14 +146,24 @@ x_axis=np.linspace(10, 100, num=10)
 for i in range(10):
     x_axis[i]=int(x_axis[i])
 fig = plt.figure()
-plt.figure(dpi=300)  #getting better resolution
-plt.boxplot(cajas, 'ro',  positions= x_axis, widths=5)
-plt.plot(x_axis, [np.mean(cajas[i]) for i in range(10)], 'b.')
-plt.plot(x_axis, means[0:10], 'ro')
+plt.figure(dpi=300)  
+plt.boxplot(cajas, positions= x_axis, widths=5)
 plt.xlabel('Population size')
 plt.ylabel('Duration in hours')
 # show plot
-plt.title('Exact and simulated durations, h=12 hours')
-plt.savefig("duration_half_day.png")
+plt.title('Simulated durations')
 plt.show()
+
+
+fig = plt.figure()
+plt.figure(dpi=300)  
+plt.plot(x_axis, [np.mean(cajas[i]) for i in range(10)], 'r.')
+plt.plot(x_axis, means[0:10], 'b.')
+plt.xlabel('Population size')
+plt.ylabel('Duration in hours')
+plt.title('Exact and empirical mean durations')
+plt.show()
+
+
+
 
