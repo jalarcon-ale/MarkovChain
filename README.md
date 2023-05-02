@@ -2,7 +2,7 @@
 Contact info: alejandrojavier.alarcongonzalez@uantwerpen.be
 
 
-The Python file ChainBinomial contains the code to generate realizations (simulations) of a discrete-time Markovian SIR model. This model is 
+The Python file Markov_SIR contains the code to generate realizations (simulations) of a discrete-time Markovian SIR model. This model is 
 introduced next.
 
 The number of newly infected and removed individuals at time $t+h$ are denoted by $I_{t+h}^{new}$ and $R_{t+h}^{new}$, respectively. 
