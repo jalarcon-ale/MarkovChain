@@ -2,8 +2,7 @@
 Contact info: alejandrojavier.alarcongonzalez@uantwerpen.be
 
 
-The Python file Markov_SIR contains the code used to generate the data in the pre-print "Computation of Expected Epidemic Duration". The file endofepi.py contains the class being called in Markov_SIR, and thus should be located in the same directory. The files 
-converging_means.txt, simulated_durations.txt and exact_means.txt contain all the (synthetic) data used in the manuscript. 
+The Python file Markov_SIR contains the code used to generate the data in the pre-print "Computation of Expected Epidemic Duration". The file endofepi.py contains the class being called in Markov_SIR. The files: converging_means.txt, simulated_durations.txt and exact_means.txt contain all the (synthetic) data used in the manuscript. 
 
 The discrete-time Markovian SIR model used in the manuscript is introduced next. The number of newly infected and removed individuals at time $t+h$ are denoted by $I_{t+h}^{new}$ and $R_{t+h}^{new}$, respectively. 
 Their update rule reads as follows
